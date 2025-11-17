@@ -57,7 +57,7 @@ def cruzar_fuentes(
     print(f"Cruce espacial completado. Filas resultantes: {count_pre_temporal}")
 
     # 2. Cruce Temporal (Final) - Test 2.3
-    # La llave compuesta de 3 partes (Entregable 1, pg. 2)
+    # La llave compuesta de 3 partes (Entregable 1)
     # df_acc_con_estacion.CODIGO_CORTO (int) == df_meteo.COD_ESTACION (int)
     # df_acc_con_estacion.fecha (date) == df_meteo.FECHA (date)
     # df_acc_con_estacion.hora (string "HXX") == df_meteo.HORA (string "HXX")
@@ -70,7 +70,7 @@ def cruzar_fuentes(
             df_acc_con_estacion.hora == df_meteo.HORA,
             df_acc_con_estacion.CODIGO_CORTO == df_meteo.COD_ESTACION,
         ],
-        "left",
+        "inner",
     )
 
     df_final_ml = (
@@ -97,8 +97,7 @@ def cruzar_fuentes(
         "VV_81_t-2h",
         "P_89_t-2h",
         "hora",
-        "edad",
-    ]
+      ]
 
     columnas_categoricas = [
         "tipo_accidente",
@@ -109,6 +108,7 @@ def cruzar_fuentes(
         "positiva_droga",
         "tipo_vehículo",
         "tipo_persona",
+        "edad"
     ]
 
     columnas_clave = ["num_expediente", "accidente_grave"]

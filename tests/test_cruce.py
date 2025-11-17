@@ -41,7 +41,8 @@ def mock_data(spark):
                 "CENTRO",
                 "H",
                 "Despejado",
-            ),  # Grave, cerca de E1
+                30,  # <--- EDAD AÑADIDA
+            ),  # Grave, cerca de E1. TIENE CLIMA.
             (
                 2,
                 "01/01/2025",
@@ -53,7 +54,8 @@ def mock_data(spark):
                 "RETIRO",
                 "M",
                 "Nublado",
-            ),  # Leve, cerca de E2
+                45,  # <--- EDAD AÑADIDA
+            ),  # Leve, cerca de E2. TIENE CLIMA.
             (
                 3,
                 "01/01/2025",
@@ -65,7 +67,8 @@ def mock_data(spark):
                 "CENTRO",
                 "H",
                 "Despejado",
-            ),  # Leve, cerca de E1, sin clima
+                22,  # <--- EDAD AÑADIDA
+            ),  # Leve, cerca de E1. NO TIENE CLIMA.
         ],
         [
             "num_expediente",
@@ -78,6 +81,7 @@ def mock_data(spark):
             "distrito",
             "sexo",
             "estado_meteorológico",
+            "edad",  # <--- NOMBRE DE COLUMNA AÑADIDO
         ],
     )
 
@@ -164,6 +168,7 @@ def mock_data(spark):
 def test_spatial_join_logic(spark, mock_data):
     """
     Test 2.1: Verificar que el cruce espacial asigna la estación MÁS cercana.
+    (Este test sigue siendo válido para INNER JOIN, ya que el Accidente 1 sí tiene datos)
     """
     df_a, df_b, df_c = mock_data
 
@@ -181,31 +186,37 @@ def test_spatial_join_logic(spark, mock_data):
 
 def test_join_completeness_y_schema(spark, mock_data):
     """
-    Test 2.2, 2.3 y 2.4: Verificar completitud de joins y schema final.
+    Test 2.2, 2.3 y 2.4: Verificar completitud de joins (INNER) y schema final.
     """
     df_a, df_b, df_c = mock_data
 
     df_final = cruzar_fuentes(spark, df_a, df_b, df_c)
 
-    # Test 2.2 (Completitud) - Deberíamos tener 3 expedientes
-    assert df_final.count() == 3
+    # Test 2.2 (Completitud) - Deberíamos tener 2 expedientes (INNER JOIN)
+    # <--- MODIFICADO: Se espera 2 en lugar de 3
+    assert df_final.count() == 2
 
     resultados = {r.num_expediente: r for r in df_final.collect()}
 
-    # Test 2.3 (Left Join) - Accidente 3 no tiene clima, T_83 debe ser 0 (por na.fill)
+    # Test 2.3 (Inner Join) - Accidente 3 no tiene clima, debe ser excluido
+    # <--- MODIFICADO: Título y lógica
     assert resultados[1].num_expediente == 1
     assert resultados[1]["T_83_t=0"] == 5.0
 
     assert resultados[2].num_expediente == 2
     assert resultados[2]["T_83_t=0"] == 25.0
 
-    assert resultados[3].num_expediente == 3
-    assert resultados[3]["T_83_t=0"] == 0  # Resultado del Left Join + na.fill(0)
-    assert (
-        resultados[3].tipo_accidente == "Otro"
-    )  # Verificar que las columnas categóricas se mantienen
+    # <--- MODIFICADO: Se comprueba que el 3 NO ESTÁ
+    assert 3 not in resultados  # El Accidente 3 debe ser excluido por el INNER JOIN
 
-    # Test 2.4 (Schema)
+    # <--- MODIFICADO: Se eliminan las aserciones para resultados[3]
+    # assert resultados[3].num_expediente == 3
+    # assert resultados[3]["T_83_t=0"] == 0
+    # assert (
+    #     resultados[3].tipo_accidente == "Otro"
+    # )
+
+    # Test 2.4 (Schema) - El schema final debe ser el mismo
     columnas_finales_esperadas = [
         "num_expediente",
         "accidente_grave",
@@ -222,7 +233,8 @@ def test_join_completeness_y_schema(spark, mock_data):
         "distrito",
         "sexo",
         "estado_meteorológico",
-        "hora",  
+        "hora",
+        "edad",
     ]
 
     for col_name in columnas_finales_esperadas:

@@ -13,7 +13,7 @@ from src.cruce import cruzar_fuentes
 from src.materializacion import materializar_datos
 
 
-def main(target):
+def main():
     """
     Programa principal que orquesta el pipeline de ETL
     """
@@ -51,23 +51,12 @@ def main(target):
     df_final_ml.show(5)
 
     # --- Fase 2: Materialización ---
-    print(f"Iniciando Fase 2: Materialización en '{target}'...")
-    materializar_datos(df_final_ml, target, "dataset_final_ml")
+    print(f"Iniciando Fase 2: Materialización en BD...")
+    materializar_datos(df_final_ml, "dataset_final_ml")
     print("Materialización completada.")
 
     spark.stop()
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Ejecutar pipeline de ETL para proyecto Big Data."
-    )
-    parser.add_argument(
-        "--target",
-        type=str,
-        choices=["local", "azure"],
-        required=True,
-        help="El destino de materialización ('local' para PostgreSQL, 'azure' para ADLS)",
-    )
-    args = parser.parse_args()
-    main(args.target)
+    main()

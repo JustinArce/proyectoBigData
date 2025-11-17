@@ -1,8 +1,0 @@
-FROM manu3193/bigdata
-
-# --- Adiciones para el Experimento (MLflow, Optuna, Azure) ---
-RUN pip3 install mlflow optuna azure-ai-ml azure-identity azureml-fsspec psycopg2-binary
-
-WORKDIR /src
-
-COPY . /src
