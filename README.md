@@ -15,7 +15,7 @@ Siga estos pasos para configurar y ejecutar el proyecto completo en su máquina 
 Primero, clone este repositorio de GitHub en su máquina local.
 
 ```bash
-git clone https://github.com/J
+git clone https://github.com/JustinArce/proyectoBigData
 cd proyectoBigDataJA
 ```
 
